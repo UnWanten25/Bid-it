@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>1v1 Auction</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#17142E"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ECEBF6;--surface:#fff;--ink:#16132E;--mute:#615E88;--line:#D8D5EE;--p1:#2F55F5;--p2:#D81B6A;--gold:#F6B92B;--card:#17142E;--cardInk:#F4F2FF;--ok:#12805A;--r:16px;
+--disp:'Bricolage Grotesque',system-ui,sans-serif;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E0C1D;--surface:#1A1733;--ink:#F1EFFF;--mute:#A09CC9;--line:#2D2951;--p1:#7B93FF;--p2:#FF5C9E;--card:#2A2457;--ok:#3DD598}}
+:root[data-theme="dark"]{--bg:#0E0C1D;--surface:#1A1733;--ink:#F1EFFF;--mute:#A09CC9;--line:#2D2951;--p1:#7B93FF;--p2:#FF5C9E;--card:#2A2457;--ok:#3DD598}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--body);-webkit-tap-highlight-color:transparent}
+.app{max-width:560px;margin:auto;padding:14px 14px 40px}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;min-height:48px;padding:0 16px;font-weight:600;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.cta{background:var(--accent,var(--p1));border-color:transparent;color:#fff;width:100%;min-height:56px;font-size:19px;font-family:var(--disp);font-weight:800}
+.ghost{background:transparent}.wide{width:100%}
+h1,h2,h3{font-family:var(--disp);margin:0}
+.muted{color:var(--mute)}
+/* menu */
+.hero{padding:34px 4px 18px}.hero h1{font-size:46px;line-height:1;font-weight:800;letter-spacing:-.02em}.hero p{margin:10px 0 0;color:var(--mute);max-width:36ch}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px}
+.mode{display:block;text-align:left;padding:16px;min-height:132px;background:var(--card);color:var(--cardInk);border:0;border-radius:var(--r)}
+.mode b{display:block;font:800 24px/1.1 var(--disp);margin-top:10px}.mode span{font-size:14px;opacity:.75}.mode em{font-style:normal;font-size:30px}
+.box{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;margin-top:10px}
+.box h3{font-size:18px;margin-bottom:8px}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.names label{display:block;font-size:14px;font-weight:600}
+input[type=text],input[type=number]{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font:inherit;padding:0 12px;margin-top:4px}
+.n1{border-left:5px solid var(--p1)!important}.n2{border-left:5px solid var(--p2)!important}
+.score{display:flex;align-items:baseline;justify-content:space-between;font-family:var(--disp);font-weight:800;font-size:26px}
+.score span:nth-child(1){color:var(--p1)}.score span:nth-child(3){color:var(--p2)}.score small{font:400 14px var(--body);color:var(--mute)}
+.hist{list-style:none;margin:8px 0 0;padding:0;font-size:14px}.hist li{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--line)}
+.resume{display:flex;gap:10px;align-items:center;justify-content:space-between}
+/* game */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.bar button{min-height:40px;padding:0 12px}.bar strong{font-family:var(--disp);font-size:18px}
+.wallets{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wallet{--c:var(--p1);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:10px 12px;position:relative;transition:box-shadow .2s}
+.wallet.two{--c:var(--p2)}
+.wallet.active{box-shadow:0 0 0 3px var(--c);border-color:var(--c)}
+.wn{font-weight:700;color:var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm{font:800 32px/1.1 var(--disp)}
+.pips{display:flex;gap:4px;margin-top:6px}.pips i{flex:1;height:6px;border-radius:3px;background:var(--line)}.pips i.on{background:var(--c)}
+.lot{--accent:var(--p1);margin-top:12px;background:var(--card);color:var(--cardInk);border-radius:22px;padding:18px 18px 20px;border-top:8px solid var(--accent);text-align:center}
+.lot.two{--accent:var(--p2)}
+.lot .top{display:flex;justify-content:space-between;font-size:14px;opacity:.85;gap:8px;flex-wrap:wrap}
+.lot .tag{font-weight:700;color:var(--accent);filter:brightness(1.35)}
+.lot h2{font-size:clamp(28px,8vw,40px);font-weight:800;line-height:1.05;margin-top:16px;overflow-wrap:anywhere}
+.lot .form{color:var(--gold);font-weight:700;min-height:1.4em}
+.sealed{display:inline-block;margin-top:10px;border:1.5px dashed rgba(255,255,255,.4);border-radius:999px;padding:3px 12px;font-size:14px}
+.price{font:800 clamp(72px,24vw,112px)/1 var(--disp);color:var(--gold);margin:8px 0 2px;letter-spacing:-.03em}
+.price small{font-size:.4em;vertical-align:.9em;margin-right:2px}
+.holder{font-size:15px;opacity:.9;min-height:1.4em}
+.controls{margin-top:12px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.chips button{padding:0;min-height:44px}
+.stepper{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;margin:10px 0}.stepper button{padding:0;font-size:24px}
+.stepper label{position:relative;display:block}.stepper label span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font:800 22px var(--disp);color:var(--mute)}
+.stepper input{margin:0;min-height:56px;font:800 26px var(--disp);text-align:center}
+.note{margin:10px 2px 0;font-size:14px;color:var(--mute);min-height:1.4em}.note.err{color:var(--p2);font-weight:600}
+.offer{display:grid;gap:10px}
+.rosters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.roster{--c:var(--p1)}.roster.two{--c:var(--p2)}
+.roster h3{font-size:16px;color:var(--c);margin:0 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.roster ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.roster li{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:8px 10px;font-size:14px;min-height:42px}
+.roster li small{display:block;color:var(--mute);font-size:12px}
+.roster li b{font:800 18px var(--disp)}
+.roster li.empty{border-style:dashed;border-left-style:dashed;color:var(--mute);background:transparent}
+.roster li.sum{background:var(--c);color:#fff;border-color:var(--c)}
+.roster li.in{animation:pop .45s var(--d,0ms) both}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.result{margin-top:12px;background:var(--card);color:var(--cardInk);border-radius:22px;padding:20px;text-align:center}
+.result h2{font-size:32px;font-weight:800}.result .bars{display:grid;gap:8px;margin:16px 0;text-align:left}
+.bars div{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;font-size:14px}.bars u{display:block;height:14px;border-radius:7px;text-decoration:none;transition:width .8s}
+.bars b{font:800 18px var(--disp);text-align:right}
+.logbox{margin-top:14px;font-size:14px}.logbox summary{cursor:pointer;color:var(--mute);min-height:40px;display:flex;align-items:center}
+.logbox div div{padding:5px 0;border-top:1px solid var(--line)}
+@media(max-width:380px){.hero h1{font-size:38px}.modes{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="menu">
+ <div class="hero"><h1>1v1 Auction</h1><p>Bid on 10 lots with $20. Build a squad of 5. The squad with the highest hidden power wins.</p></div>
+ <div class="modes">
+  <button class="mode" id="modePoke"><em>⚡</em><b>Pokémon</b><span id="pokeCount">Gen 1–8, Megas, Gigantamax</span></button>
+  <button class="mode" id="modeMCU"><em>🦸</em><b>MCU</b><span id="mcuCount">Heroes, villains, X-Men</span></button>
+ </div>
+ <div class="box resume" id="resumeBox" hidden><div><h3 id="resumeTitle">Continue game</h3><div class="muted" id="resumeSub"></div></div><button class="cta" id="resumeBtn" style="width:auto;min-height:48px;font-size:16px;padding:0 18px">Open</button></div>
+ <div class="box"><h3>Players</h3><div class="names"><label>Player 1<input type="text" id="name1" class="n1" maxlength="12" autocomplete="off"></label><label>Player 2<input type="text" id="name2" class="n2" maxlength="12" autocomplete="off"></label></div></div>
+ <div class="box" id="statsBox"></div>
+</section>
+
+<section id="game" hidden>
+ <div class="bar"><button id="menuBtn" class="ghost">Menu</button><strong id="modeTag"></strong><span class="muted" id="lotCount"></span></div>
+ <div class="wallets"><div class="wallet" id="w1"></div><div class="wallet two" id="w2"></div></div>
+ <div class="lot" id="lot">
+  <div class="top"><span class="tag" id="turnTag"></span><span id="sealed" class="sealed" style="margin:0;padding:1px 10px">🔒 Power sealed</span></div>
+  <h2 id="name"></h2><div class="form" id="form"></div>
+  <div class="price" id="price"></div><div class="holder" id="holder"></div>
+ </div>
+ <div class="result" id="resultBox" hidden></div>
+ <div class="controls">
+  <div id="bidGroup">
+   <div class="chips" id="chips"></div>
+   <div class="stepper"><button id="dec" aria-label="Lower bid">−</button><label><span>$</span><input id="bidInput" type="number" inputmode="numeric" min="1" step="1" aria-label="Bid amount"></label><button id="inc" aria-label="Raise bid">+</button></div>
+   <button class="cta" id="placeBid">Bid</button>
+   <button class="ghost wide" id="pass" style="margin-top:8px">Pass</button>
+  </div>
+  <div class="offer" id="offerGroup" hidden><button class="cta" id="takeBtn">Keep it free</button><button class="wide" id="giveBtn">Give away</button></div>
+  <div id="nextGroup" hidden><button class="cta" id="start">Next lot</button><button class="ghost wide" id="menuBtn2" style="margin-top:8px" hidden>Back to menu</button></div>
+  <div class="note" id="note"></div>
+ </div>
+ <div class="rosters"><div class="roster" id="r1"></div><div class="roster two" id="r2"></div></div>
+ <details class="logbox"><summary>Auction log</summary><div id="log"></div></details>
+</section>
+</div>
+<script>
+const MCU=`Thanos (Mad Titan):100|Arishem (Celestial):100|Ego (Living Planet):98|Captain Marvel (Carol Danvers):98|Scarlet Witch (Wanda Maximoff):97|Dormammu:96|Thor (Odinson):96|Hulk (Bruce Banner):95|Professor Hulk (Bruce Banner):94|Hela (Goddess of Death):94|Odin (Allfather):93|He Who Remains (Loki Series):92|Doctor Strange (Stephen Strange):92|Vision (JARVIS):90|Namor (Namor McKenzie):90|Adam Warlock:90|Surtur:90|Gorr (God Butcher):88|Iron Man (Tony Stark):88|Kang the Conqueror (Nathaniel Richards):88|Ancient One:88|Captain America (Steve Rogers):86|Wolverine (Logan):86|Mighty Thor (Jane Foster):85|Red Hulk (Thunderbolt Ross):85|Ultron:85|Ikaris:85|Xu Wenwu (The Mandarin):85|Deadpool (Wade Wilson):85|Agatha Harkness:85|Black Panther (T'Challa):84|Thena:84|America Chavez:84|Spider-Man (Tom Holland):83|Spider-Man (Tobey Maguire):82|Spider-Man (Andrew Garfield):82|Shang-Chi:82|She-Hulk (Jennifer Walters):82|Gilgamesh:82|Ajak:82|Loki (Tom Hiddleston):80|Moon Knight (Marc Spector):80|Ronan the Accuser:80|Heimdall:80|Sersi:80|Wong:78|Groot:78|Sylvie (Lady Loki):78|Abomination (Emil Blonsky):78|High Evolutionary:78|Malekith:78|Ebony Maw:78|Druig:78|Doc Ock (Otto Octavius):77|Green Goblin (Norman Osborn):76|Gamora:76|Valkyrie:76|Cull Obsidian:76|Makkari:76|Winter Soldier (Bucky Barnes):75|Classic Loki (Loki Series):74|Electro (Max Dillon):74|Sandman (Flint Marko):74|Killmonger (Erik Stevens):74|Proxima Midnight:74|President Loki (Loki Series):72|Drax:72|War Machine (James Rhodes):72|Shuri:72|Corvus Glaive:72|Frigga:70|Ravonna Renslayer (Loki Series):70|Ant-Man (Scott Lang):70|Star-Lord (Peter Quill):70|Nebula:70|Okoye:70|Red Skull:70|Ironheart (Riri Williams):70|Ms. Marvel (Kamala Khan):70|Sif:70|Kingo:70|Kro:70|Death Dealer:70|Kingpin (Wilson Fisk):68|Yondu:68|Quicksilver (Pietro Maximoff):68|Lizard (Curt Connors):66|Wasp (Hope van Dyne):66|Rocket Raccoon:66|Daredevil (Matt Murdock):66|Falcon (Sam Wilson):65|Taskmaster:66|Kaecilius:66|Iron Monger (Obadiah Stane):66|Yon-Rogg:66|Ghost (Ava Starr):64|Mordo:64|Aldrich Killian:64|Kid Loki (Loki Series):62|Captain Carter (Peggy Carter):62|Black Widow (Natasha Romanoff):62|Yelena Belova:62|Mantis:62|Mysterio (Quentin Beck):62|Boastful Loki (Loki Series):60|Hawkeye (Clint Barton):60|Phastos:60|Grandmaster:60|Eitri:60|Nick Fury:58|Vulture (Adrian Toomes):58|Hunter B-15 (Loki Series):56|Victor Timely (Loki Series):55|Korg:55|Whiplash (Ivan Vanko):55|Collector:55|Kate Bishop:52|Pepper Potts (Rescue):50|Sprite:50|M.O.D.O.K.:50|Zemo (Helmut Zemo):45|Alligator Loki (Loki Series):45|Phil Coulson:44|Mobius (Loki Series):40|Miss Minutes (Loki Series):40|Maria Hill:40|Doctor Doom (Victor von Doom):99|God Emperor Doom (Secret Wars):100|Beyonder (Secret Wars):100|Molecule Man (Secret Wars):94|Galactus (Planet Eater):100|Silver Surfer (Shalla-Bal):95|Sentry (Bob Reynolds):98|Professor X (Charles Xavier):95|Magneto (Erik Lehnsherr):94|Invisible Woman (Sue Storm):88|Mr. Fantastic (Reed Richards):86|The Thing (Ben Grimm):84|Human Torch (Johnny Storm):82|Cyclops (Scott Summers):80|Captain America (Sam Wilson):78|Beast (Hank McCoy):76|Nightcrawler (Kurt Wagner):76|Gambit (Remy LeBeau):74|Mystique (Raven Darkholme):70|M'Baku (Jabari Tribe):70|U.S. Agent (John Walker):68|Red Guardian (Alexei Shostakov):66|Falcon (Joaquin Torres):60|Spider-Man (Iron Spider):86|Spider-Man (Brand New Day):85|Punisher (Frank Castle):72|Scorpion (Mac Gargan):66|Happy Hogan:38|Ned Leeds (Guy in the Chair):35|MJ (Michelle Jones-Watson):36|Aunt May:30|Scarlet Witch (Darkhold Wanda):98|Rio Vidal (Death):95|Billy Maximoff (Wiccan):88|White Vision:86|Monica Rambeau (Photon):80|Tommy Maximoff (Speed):74|Pietro (Ralph Bohner):55|Alice Wu-Gulliver:50|Darcy Lewis:38|Jimmy Woo:36|Director Hayward:35`;
+const DATA=`Bulbasaur:318|Ivysaur:405|Venusaur:525|Charmander:309|Charmeleon:405|Charizard:534|Squirtle:314|Wartortle:405|Blastoise:530|Caterpie:195|Metapod:205|Butterfree:395|Weedle:195|Kakuna:205|Beedrill:395|Pidgey:251|Pidgeotto:349|Pidgeot:479|Rattata:253|Raticate:413|Spearow:262|Fearow:442|Ekans:288|Arbok:448|Pikachu:320|Raichu:485|Sandshrew:300|Sandslash:450|Nidoran F:275|Nidorina:365|Nidoqueen:505|Nidoran M:273|Nidorino:365|Nidoking:505|Clefairy:323|Clefable:483|Vulpix:299|Ninetales:505|Jigglypuff:270|Wigglytuff:435|Zubat:245|Golbat:455|Oddish:320|Gloom:395|Vileplume:490|Paras:285|Parasect:405|Venonat:305|Venomoth:450|Diglett:265|Dugtrio:425|Meowth:290|Persian:440|Psyduck:320|Golduck:500|Mankey:305|Primeape:455|Growlithe:350|Arcanine:555|Poliwag:300|Poliwhirl:385|Poliwrath:510|Abra:310|Kadabra:400|Alakazam:500|Machop:305|Machoke:405|Machamp:505|Bellsprout:300|Weepinbell:390|Victreebel:490|Tentacool:335|Tentacruel:515|Geodude:300|Graveler:390|Golem:495|Ponyta:410|Rapidash:500|Slowpoke:315|Slowbro:490|Magnemite:325|Magneton:465|Farfetch'd:377|Doduo:310|Dodrio:470|Seel:325|Dewgong:475|Grimer:325|Muk:500|Shellder:305|Cloyster:525|Gastly:310|Haunter:405|Gengar:500|Onix:385|Drowzee:328|Hypno:483|Krabby:325|Kingler:475|Voltorb:330|Electrode:490|Exeggcute:325|Exeggutor:530|Cubone:320|Marowak:425|Hitmonlee:455|Hitmonchan:455|Lickitung:385|Koffing:340|Weezing:490|Rhyhorn:345|Rhydon:485|Chansey:450|Tangela:435|Kangaskhan:490|Horsea:295|Seadra:440|Goldeen:320|Seaking:450|Staryu:340|Starmie:520|Mr. Mime:460|Scyther:500|Jynx:455|Electabuzz:490|Magmar:495|Pinsir:500|Tauros:490|Magikarp:200|Gyarados:540|Lapras:535|Ditto:288|Eevee:325|Vaporeon:525|Jolteon:525|Flareon:525|Porygon:395|Omanyte:355|Omastar:495|Kabuto:355|Kabutops:495|Aerodactyl:515|Snorlax:540|Articuno:580|Zapdos:580|Moltres:580|Dratini:300|Dragonair:420|Dragonite:600|Mewtwo:680|Mew:600|Chikorita:318|Bayleef:405|Meganium:525|Cyndaquil:309|Quilava:405|Typhlosion:534|Totodile:314|Croconaw:405|Feraligatr:530|Pichu:205|Togepi:245|Togetic:405|Ampharos:510|Espeon:525|Umbreon:525|Steelix:510|Scizor:500|Heracross:500|Sneasel:430|Houndoom:500|Kingdra:540|Donphan:500|Porygon2:515|Tyranitar:600|Larvitar:300|Pupitar:410|Blissey:540|Raikou:580|Entei:580|Suicune:580|Lugia:680|Ho-Oh:680|Celebi:600|Miltank:490|Skarmory:465|Politoed:500|Slowking:490|Wobbuffet:405|Girafarig:455|Gligar:430|Treecko:310|Grovyle:405|Sceptile:530|Torchic:310|Combusken:405|Blaziken:530|Mudkip:310|Marshtomp:405|Swampert:535|Gardevoir:518|Gallade:518|Ralts:198|Kirlia:278|Salamence:600|Bagon:300|Shelgon:420|Metagross:600|Beldum:300|Metang:420|Aggron:530|Absol:465|Flygon:520|Milotic:540|Slaking:670|Breloom:460|Manectric:475|Sableye:380|Mawile:380|Camerupt:460|Walrein:530|Glalie:480|Latias:600|Latios:600|Kyogre:670|Groudon:670|Rayquaza:680|Jirachi:600|Deoxys:600|Regirock:580|Regice:580|Registeel:580|Banette:455|Altaria:490|Crawdaunt:468|Cradily:495|Armaldo:495|Tropius:460|Dusclops:455|Whiscash:468|Ludicolo:480|Shiftry:480|Swellow:455|Turtwig:318|Grotle:405|Torterra:525|Chimchar:309|Monferno:405|Infernape:534|Piplup:314|Prinplup:405|Empoleon:530|Lucario:525|Riolu:285|Garchomp:600|Gible:300|Gabite:410|Togekiss:545|Roserade:515|Luxray:523|Gliscor:510|Mamoswine:530|Weavile:510|Electivire:540|Magmortar:540|Leafeon:525|Glaceon:525|Dialga:680|Palkia:680|Giratina:680|Heatran:600|Regigigas:670|Darkrai:600|Arceus:720|Dusknoir:525|Rotom:440|Lopunny:480|Spiritomb:485|Toxicroak:490|Abomasnow:494|Yanmega:515|Porygon-Z:535|Rhyperior:535|Tangrowth:535|Hippowdon:525|Drapion:500|Gastrodon:475|Mismagius:495|Honchkrow:505|Froslass:480|Uxie:580|Mesprit:580|Azelf:580|Cresselia:600|Manaphy:600|Shaymin:600|Phione:480|Snivy:308|Servine:413|Serperior:528|Tepig:308|Pignite:418|Emboar:528|Oshawott:308|Dewott:413|Samurott:528|Zekrom:680|Reshiram:680|Kyurem:660|Victini:600|Hydreigon:600|Volcarona:550|Excadrill:508|Conkeldurr:505|Chandelure:520|Haxorus:540|Garbodor:474|Ferrothorn:489|Bisharp:490|Krookodile:519|Scrafty:488|Zoroark:510|Galvantula:472|Lilligant:480|Reuniclus:490|Mienshao:510|Golurk:483|Braviary:510|Mandibuzz:510|Cobalion:580|Terrakion:580|Virizion:580|Tornadus:580|Thundurus:580|Landorus:600|Keldeo:580|Meloetta:600|Genesect:600|Audino:445|Zebstrika:497|Beartic:505|Cinccino:470|Jellicent:480|Amoonguss:464|Durant:484|Cofagrigus:483|Accelgor:495|Escavalier:495|Sawk:465|Throh:465|Chespin:313|Quilladin:405|Chesnaught:530|Fennekin:307|Braixen:409|Delphox:534|Froakie:314|Frogadier:405|Greninja:530|Talonflame:499|Aegislash:500|Sylveon:525|Goodra:600|Noivern:535|Xerneas:680|Yveltal:680|Zygarde:600|Diancie:600|Hoopa:600|Volcanion:600|Tyrantrum:521|Aurorus:521|Hawlucha:500|Pangoro:495|Gogoat:531|Klefki:470|Trevenant:474|Gourgeist:494|Barbaracle:500|Dragalge:494|Clawitzer:500|Heliolisk:481|Malamar:482|Meowstic:466|Honedge:325|Dedenne:431|Carbink:500|Amaura:472|Sliggoo:452|Goomy:300|Inkay:288|Bunnelby:237|Fletchling:278|Rowlet:320|Dartrix:420|Decidueye:530|Litten:320|Torracat:420|Incineroar:530|Popplio:320|Brionne:420|Primarina:530|Tapu Koko:570|Tapu Lele:570|Tapu Bulu:570|Tapu Fini:570|Cosmog:200|Solgaleo:680|Lunala:680|Necrozma:600|Magearna:600|Marshadow:600|Zeraora:600|Meltan:300|Melmetal:600|Mimikyu:476|Toxapex:495|Salazzle:480|Bewear:500|Lycanroc:487|Wishiwashi:175|Golisopod:530|Palossand:480|Kommo-o:600|Bruxish:475|Tsareena:510|Mudsdale:500|Araquanid:454|Turtonator:485|Drampa:485|Vikavolt:500|Ribombee:464|Oranguru:490|Passimian:490|Comfey:485|Dhelmise:517|Stakataka:570|Blacephalon:570|Guzzlord:570|Nihilego:570|Buzzwole:570|Pheromosa:570|Xurkitree:570|Celesteela:570|Kartana:570|Poipole:420|Naganadel:540|Type Null:534|Silvally:570|Minior:440|Crabominable:478|Pyukumuku:410|Rockruff:280|Mareanie:305|Fomantis:250|Cutiefly:304|Grubbin:300|Pikipek:265|Yungoos:253|Grookey:310|Thwackey:420|Rillaboom:530|Scorbunny:310|Raboot:420|Cinderace:530|Sobble:310|Drizzile:420|Inteleon:530|Zacian:660|Zamazenta:660|Eternatus:690|Calyrex:500|Corviknight:495|Dragapult:600|Toxtricity:502|Hatterene:485|Grimmsnarl:510|Alcremie:495|Copperajah:500|Duraludon:535|Urshifu:550|Zarude:600|Regieleki:580|Regidrago:580|Glastrier:580|Spectrier:580|Dracovish:505|Dracozolt:505|Arctozolt:505|Arctovish:505|Falinks:470|Dubwool:490|Drednaw:485|Coalossal:510|Flapple:485|Appletun:485|Sandaconda:510|Cramorant:475|Barraskewda:490|Polteageist:508|Sirfetch'd:507|Mr. Rime:520|Runerigus:483|Cursola:510|Obstagoon:520|Perrserker:440|Indeedee:475|Morpeko:436|Cufant:330|Stonjourner:470|Eiscue:470|Pincurchin:435|Frosmoth:475|Centiskorch:525|Orbeetle:505|Boltund:490|Wyrdeer:525|Kleavor:500|Ursaluna:550|Basculegion:530|Sneasler:510|Overqwil:510|Enamorus:580`;
+const $=id=>document.getElementById(id);
+const MODES={pokemon:{title:'Pokémon',single:'Pokémon',plural:'Pokémon'},mcu:{title:'MCU',single:'character',plural:'characters'}};
+const store={
+ get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}},
+ set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const clean=v=>String(v||'').replace(/[<>&"'`]/g,'').trim().slice(0,12);
+let names=['Player 1','Player 2'],mode='pokemon',cfg=MODES.pokemon,all=[],current=null,turn=0,bid=1,high=0,active=false,offering=false,chooser=0,
+ budgets=[20,20],teams=[[],[]],logs=[],noteText='',noteErr=false,revealed=false,recorded=false,animate=false,inGame=false,draft=2;
+const pn=i=>names[i];
+function log(s){logs.unshift(s);if(logs.length>60)logs.length=60}
+
+/* data */
+function loadMCU(){all=MCU.split('|').map((e,i)=>{const k=e.lastIndexOf(':');return{id:'m'+i,name:e.slice(0,k),form:'',power:Number(e.slice(k+1))}})}
+function loadPokemon(){
+ all=[];const seen=new Set();
+ DATA.split('|').forEach((e,i)=>{const k=e.lastIndexOf(':');const name=e.slice(0,k),bst=Number(e.slice(k+1));if(seen.has(name))return;seen.add(name);all.push({id:i+1,name,form:'',power:Math.round(bst/6)})});
+ const megas=['Venusaur','Charizard X','Charizard Y','Blastoise','Beedrill','Pidgeot','Alakazam','Slowbro','Gengar','Kangaskhan','Pinsir','Gyarados','Aerodactyl','Ampharos','Steelix','Scizor','Heracross','Houndoom','Tyranitar','Sceptile','Blaziken','Swampert','Gardevoir','Sableye','Mawile','Aggron','Medicham','Manectric','Banette','Absol','Glalie','Salamence','Metagross','Latias','Latios','Rayquaza','Lopunny','Gallade','Audino','Diancie','Lucario','Mewtwo X','Mewtwo Y','Garchomp'];
+ megas.forEach((n,i)=>{const base=n.replace(/ X| Y/,'');const f=all.find(x=>x.name.toLowerCase()===base.toLowerCase());if(f)all.push({id:'mega'+i,name:base,form:n.includes(' X')?'Mega X':n.includes(' Y')?'Mega Y':'Mega',power:Math.min(100,f.power+10)})});
+ ['Charizard','Pikachu','Gengar','Machamp','Kingler','Lapras','Eevee','Snorlax','Garbodor','Melmetal','Corviknight','Drednaw','Alcremie','Hatterene','Grimmsnarl','Copperajah','Duraludon','Urshifu','Cinderace','Rillaboom','Inteleon'].forEach((n,i)=>{const f=all.find(x=>x.name.toLowerCase()===n.toLowerCase());if(f)all.push({id:'gmax'+i,name:n,form:'Gigantamax',power:Math.min(100,f.power+8)})});
+}
+const loadMode=m=>m==='pokemon'?loadPokemon():loadMCU();
+
+/* game logic */
+const sum=i=>teams[i].reduce((a,x)=>a+x.power,0);
+const inTeams=x=>teams[0].some(t=>t.id===x.id)||teams[1].some(t=>t.id===x.id);
+function resetDraft(){draft=Math.min(bid+1,Math.max(budgets[turn],bid+1))}
+function setNote(t,err){noteText=t||'';noteErr=!!err}
+function nextTurn(){
+ turn=1-turn;
+ if(teams[turn].length>=5&&teams[1-turn].length<5)turn=1-turn;
+ resetDraft();render();checkStuck();
+}
+function checkStuck(){
+ if(!active||offering)return;
+ if(budgets[high]<bid){
+  let o=1-high;
+  if(budgets[0]===0&&budgets[1]===0){const open=[0,1].filter(i=>teams[i].length<5);o=open[Math.floor(Math.random()*open.length)]}
+  if(teams[o].length<5){log(`${pn(high)} can't pay. <b>${current.name}</b> goes to ${pn(o)} free.`);high=o}
+  bid=0;
+ }
+ if(turn===high&&budgets[turn]<bid+1&&budgets[1-turn]>=bid+1&&teams[1-turn].length<5){turn=1-turn;resetDraft();render()}
+ if(budgets[turn]<bid+1&&(turn!==high||budgets[1-turn]<bid+1)){
+  if(turn!==high)log(`${pn(turn)} can't bid any higher.`);
+  winAuction(high);
+ }
+}
+function winAuction(w){
+ if(!active)return;
+ teams[w].push(current);budgets[w]-=bid;
+ log(`${pn(w)} won <b>${current.name}</b> for ${bid?'$'+bid:'free'}.`);
+ let auto=false;
+ if(teams[w].length===5&&teams[1-w].length<5){
+  const o=1-w;auto=true;log(`${pn(w)} has 5. Remaining lots go to ${pn(o)}.`);
+  while(teams[o].length<5){const pool=all.filter(x=>!inTeams(x));if(!pool.length)break;const p=pool[Math.floor(Math.random()*pool.length)];teams[o].push(p);log(`${pn(o)} received <b>${p.name}</b> free.`)}
+ }
+ active=false;offering=false;
+ setNote(`${pn(w)} won ${current.name} for ${bid?'$'+bid:'free'}.`+(auto?` ${pn(w)} is full, so ${pn(1-w)} got the rest.`:''));
+ render();
+}
+function submitBid(raw){
+ if(!active||offering)return;
+ if(!Number.isInteger(raw)||raw<=bid){setNote(`Enter a whole number above $${bid}.`,true);return render()}
+ if(raw>budgets[turn]){setNote(`${pn(turn)} only has $${budgets[turn]}.`,true);return render()}
+ bid=raw;high=turn;setNote('');nextTurn();
+}
+function startOfferIfBroke(){
+ offering=false;
+ const z=[0,1].filter(i=>budgets[i]===0);
+ if(!z.length)return;
+ chooser=z.length===1?1-z[0]:(teams[0].length<teams[1].length?0:teams[1].length<teams[0].length?1:Math.floor(Math.random()*2));
+ offering=true;bid=0;high=chooser;turn=chooser;
+ log(z.length===1?`${pn(z[0])} has $0. ${pn(chooser)} chooses who gets <b>${current.name}</b>.`:`Both have $0. ${pn(chooser)} chooses who gets <b>${current.name}</b>.`);
+}
+function resolveOffer(taker){
+ if(!active||!offering)return;
+ if(taker!==chooser&&teams[taker].length>=5)return;
+ if(teams[taker].length>=5)taker=1-taker;
+ offering=false;bid=0;high=taker;winAuction(taker);
+}
+function nextLot(){
+ if(teams[0].length>=5&&teams[1].length>=5)return finish();
+ const pool=all.filter(x=>!inTeams(x));
+ if(!pool.length)return finish();
+ current=pool[Math.floor(Math.random()*pool.length)];
+ bid=1;high=0;turn=0;active=true;
+ if(teams[0].length>=5){high=1;turn=1;bid=Math.min(1,budgets[1])}
+ if(teams[1].length>=5){high=0;turn=0;bid=Math.min(1,budgets[0])}
+ setNote('');startOfferIfBroke();resetDraft();render();checkStuck();
+}
+function finish(){
+ revealed=true;active=false;offering=false;animate=true;
+ const p=[sum(0),sum(1)];
+ if(!recorded){recorded=true;recordStats(p)}
+ render();
+}
+function startGame(m){
+ mode=m;cfg=MODES[m];loadMode(m);
+ budgets=[20,20];teams=[[],[]];logs=[];revealed=false;recorded=false;animate=false;current=null;active=false;offering=false;inGame=true;
+ $('menu').hidden=true;$('game').hidden=false;window.scrollTo(0,0);
+ nextLot();
+}
+
+/* local memory */
+function getStats(){return store.get('pa:stats')||{games:0,draws:0,wins:[0,0],history:[]}}
+function recordStats(p){
+ const s=getStats();s.games++;
+ if(p[0]===p[1])s.draws++;else s.wins[p[0]>p[1]?0:1]++;
+ s.history.unshift({mode,p,n:[...names]});s.history=s.history.slice(0,6);
+ store.set('pa:stats',s);
+}
+function persist(){
+ if(!inGame)return;
+ store.set('pa:save',{mode,current,turn,bid,high,active,offering,chooser,budgets,teams,logs,noteText,revealed,recorded});
+ store.set('pa:names',names);
+}
+function resume(){
+ const sv=store.get('pa:save');if(!sv)return;
+ mode=sv.mode;cfg=MODES[mode];loadMode(mode);
+ ({current,turn,bid,high,active,offering,chooser,budgets,teams,logs,noteText,revealed,recorded}=sv);
+ animate=false;inGame=true;resetDraft();
+ $('menu').hidden=true;$('game').hidden=false;render();
+}
+function renderMenu(){
+ $('name1').value=names[0];$('name2').value=names[1];
+ const sv=store.get('pa:save');$('resumeBox').hidden=!sv;
+ if(sv){const n=sv.teams[0].length+sv.teams[1].length;
+  $('resumeTitle').textContent=sv.revealed?'View last result':'Continue game';
+  $('resumeSub').textContent=`${MODES[sv.mode].title}, ${n} of 10 lots done`;}
+ const s=getStats();
+ let h=`<h3>Scoreboard</h3>`;
+ if(!s.games)h+=`<div class="muted">No games yet. Results are saved on this device.</div>`;
+ else{
+  h+=`<div class="score"><span>${s.wins[0]}</span><small>${s.games} game${s.games>1?'s':''}, ${s.draws} draw${s.draws===1?'':'s'}</small><span>${s.wins[1]}</span></div>`;
+  h+=`<div class="score" style="font-size:14px;font-family:var(--body);font-weight:600"><span>${names[0]}</span><span></span><span>${names[1]}</span></div>`;
+  h+=`<ul class="hist">`+s.history.map(x=>`<li><span>${MODES[x.mode].title}</span><span>${x.n[0]} ${x.p[0]} vs ${x.p[1]} ${x.n[1]}</span></li>`).join('')+`</ul>`;
+  h+=`<button class="ghost wide" id="resetStats" style="margin-top:10px;min-height:42px">Reset scoreboard</button>`;
+ }
+ $('statsBox').innerHTML=h;
+ if($('resetStats'))$('resetStats').onclick=()=>{store.set('pa:stats',null);renderMenu()};
+}
+
+/* render */
+function roster(i){
+ const t=revealed?[...teams[i]].sort((a,b)=>b.power-a.power):teams[i];
+ let h=`<h3>${names[i]}</h3><ul>`+t.map((x,k)=>`<li class="${animate?'in':''}" style="--d:${k*90}ms"><span>${x.name}${x.form?`<small>${x.form}</small>`:''}</span><b>${revealed?x.power:'?'}</b></li>`).join('');
+ for(let k=t.length;k<5;k++)h+=`<li class="empty"><span>Open slot</span></li>`;
+ if(revealed)h+=`<li class="sum"><span>Total</span><b>${sum(i)}</b></li>`;
+ return h+'</ul>';
+}
+function render(){
+ const cur=offering?chooser:turn,two=cur===1;
+ $('modeTag').textContent=cfg.title;
+ $('lotCount').textContent=`Lot ${Math.min(10,teams[0].length+teams[1].length+(active?1:0))} of 10`;
+ [0,1].forEach(i=>{
+  $('w'+(i+1)).innerHTML=`<div class="wn">${names[i]}</div><div class="wm">$${budgets[i]}</div><div class="pips">${[0,1,2,3,4].map(k=>`<i class="${k<teams[i].length?'on':''}"></i>`).join('')}</div>`;
+  $('w'+(i+1)).classList.toggle('active',active&&cur===i);
+ });
+ $('lot').hidden=revealed;$('resultBox').hidden=!revealed;
+ $('lot').classList.toggle('two',two);
+ $('turnTag').textContent=active?(offering?`${pn(chooser)}, your call`:`${pn(turn)} to bid`):'Sold';
+ $('name').textContent=current?current.name:'';
+ $('form').textContent=current?current.form:'';
+ $('price').innerHTML=offering?'Free':`<small>$</small>${bid}`;
+ $('holder').textContent=active?(offering?`${pn(1-chooser)} can't bid, $${budgets[1-chooser]} left.`:`${pn(high)} holds the bid`):'';
+ $('sealed').hidden=!active;
+ const bidding=active&&!offering;
+ $('bidGroup').hidden=!bidding;$('offerGroup').hidden=!(active&&offering);$('nextGroup').hidden=active;
+ $('start').hidden=revealed;$('menuBtn2').hidden=!revealed;
+ if(bidding){
+  const b=budgets[turn];
+  $('chips').innerHTML=[1,2,5].map(k=>`<button data-v="${bid+k}" ${bid+k>b?'disabled':''}>+${k}</button>`).join('')+`<button data-v="${b}" ${b<=bid?'disabled':''}>All in</button>`;
+  $('chips').querySelectorAll('button').forEach(x=>x.onclick=()=>{draft=Number(x.dataset.v);render()});
+  const inp=$('bidInput');inp.max=b;if(String(draft??'')!==inp.value)inp.value=draft??'';
+  const ok=Number.isInteger(draft)&&draft>bid&&draft<=b;
+  $('placeBid').textContent=ok?`Bid $${draft}`:'Bid';$('placeBid').disabled=!ok;
+  $('dec').disabled=!(draft>bid+1);$('inc').disabled=!(draft<b);
+  $('pass').disabled=turn===high;$('pass').textContent=turn===high?'Pass (you hold the bid)':`Pass, ${pn(high)} wins it for $${bid}`;
+ }
+ if(active&&offering){$('takeBtn').textContent=`${pn(chooser)} keeps it free`;$('giveBtn').textContent=`Give to ${pn(1-chooser)}`;$('giveBtn').disabled=teams[1-chooser].length>=5}
+ if(!active&&!revealed)$('start').textContent=teams[0].length>=5&&teams[1].length>=5?'Reveal results':`Next lot`;
+ const n=$('note');n.textContent=noteText||(bidding?`Max for ${pn(turn)}: $${budgets[turn]}`:'');n.className='note'+(noteErr?' err':'');
+ $('r1').innerHTML=roster(0);$('r2').innerHTML=roster(1);
+ if(revealed){
+  const p=[sum(0),sum(1)],mx=Math.max(p[0],p[1],1);
+  $('resultBox').innerHTML=`<h2>${p[0]===p[1]?'It is a draw':(p[0]>p[1]?names[0]:names[1])+' wins'}</h2><div class="muted" style="color:inherit;opacity:.8">Hidden power revealed</div><div class="bars">${[0,1].map(i=>`<div><span>${names[i]}</span><u style="width:${Math.round(p[i]/mx*100)}%;background:var(--p${i+1})"></u><b>${p[i]}</b></div>`).join('')}</div><button class="cta" id="again" style="--accent:var(--gold);color:#16132E">Play again</button>`;
+  $('again').onclick=()=>startGame(mode);
+ }
+ $('log').innerHTML=logs.map(l=>`<div>${l}</div>`).join('');
+ animate=false;
+ persist();
+}
+
+/* wiring */
+$('modePoke').onclick=()=>startGame('pokemon');
+$('modeMCU').onclick=()=>startGame('mcu');
+$('resumeBtn').onclick=resume;
+$('menuBtn').onclick=$('menuBtn2').onclick=()=>{$('game').hidden=true;$('menu').hidden=false;renderMenu()};
+['name1','name2'].forEach((id,i)=>$(id).oninput=()=>{names[i]=clean($(id).value)||('Player '+(i+1));store.set('pa:names',names)});
+$('bidInput').oninput=()=>{const v=$('bidInput').value;draft=v===''?null:Number(v);render()};
+$('dec').onclick=()=>{draft=Math.max(bid+1,(draft||bid+1)-1);render()};
+$('inc').onclick=()=>{draft=Math.min(budgets[turn],(draft||bid)+1);render()};
+$('placeBid').onclick=()=>submitBid(draft);
+$('pass').onclick=()=>{if(active&&!offering&&turn!==high)winAuction(high)};
+$('takeBtn').onclick=()=>resolveOffer(chooser);
+$('giveBtn').onclick=()=>resolveOffer(1-chooser);
+$('start').onclick=nextLot;
+{const n=store.get('pa:names');if(Array.isArray(n)&&n.length===2)names=[clean(n[0])||'Player 1',clean(n[1])||'Player 2'];}
+renderMenu();
+try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js')}catch(e){}
+</script>
+</body>
+</html>
